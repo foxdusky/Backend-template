@@ -1,0 +1,36 @@
+name: 🚀 Deploy to Server
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  deploy_to_server:
+    name: Update server by ssh
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the repo
+        uses: actions/checkout@v3
+
+      - name: Connect and run script
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          port: ${{ secrets.DEPLOY_PORT }}
+          username: ${{ secrets.DEPLOY_USER_NAME }}
+          password: ${{ secrets.DEPLOY_USER_PASSWORD }}
+          script_stop: true
+          script: |
+            cd ~/${{ github.event.repository.name }}
+            
+            git checkout main
+            git pull
+
+            echo "Stop all containers"
+            docker compose stop
+            
+            echo "Clear docker cache"
+            docker system prune -f
+            
+            echo "Run updated container"
+            docker compose up -d --build
