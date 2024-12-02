@@ -1,6 +1,5 @@
-# Cargo-Rates API
+# Backend Template
 
-This API is designed to calculate the cost of cargo insurance based on data from the database
 
 # [Project Structure](./project-structure.md)
 
