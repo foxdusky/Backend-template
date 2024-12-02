@@ -1,0 +1,49 @@
+version: "3"
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    depends_on:
+      - db
+    command: bash -c "
+      cd /app/src
+      && alembic upgrade head
+      && python3 /app/src/main.py"
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./src:/app/src
+      - ./.env:/app/.env
+      - ${SSL_KEY_FILE}:/app/key_file.pem
+      - ${SSL_CERT_FILE}:/app/ssl_cert.pem
+
+  db:
+    image: postgres:16
+    ports:
+      - "5432:5432"
+    volumes:
+      - db:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+
+  dbeaver:
+    image: dbeaver/cloudbeaver
+    volumes:
+      - dbeaver:/opt/cloudbeaver/workspace
+    ports:
+      - "8978:8978"
+
+  logs-viewer:
+    image: amir20/dozzle
+    ports:
+      - "8070:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
+volumes:
+  db:
+  dbeaver:
+  pics:
